@@ -39,6 +39,19 @@ class TestCustomerManager(unittest.TestCase):
             {name: [purchase, purchase]},
             cm.customers
         )
+       
+    def test_add_list_of_purchases(self):
+        cm = CustomerManager()
+        name = "Alice"
+        purchase = [{'price': 50, 'item': 'banana'}]
+        cm.add_purchases(name, purchase)
+
+        print("RAN")
+        
+        self.assertEqual(
+            {name: purchase},
+            cm.customers
+        )
 
     def test_discount_eligibility(self):
         cm = CustomerManager()
@@ -53,6 +66,62 @@ class TestCustomerManager(unittest.TestCase):
 
         self.assertIn("Bob", output)
         self.assertIn("Eligible for discount", output)
+
+    def test_vip_customer(self):
+        cm = CustomerManager()
+        cm.add_customer("Bob", [{'price': 1100}])
+
+        # Capture printed output
+        captured = io.StringIO()
+        with contextlib.redirect_stdout(captured):
+            cm.generate_report()
+
+        output = captured.getvalue()
+
+        self.assertIn("Bob", output)
+        self.assertIn("VIP Customer!", output)
+
+    def test_priority_customer(self):
+        cm = CustomerManager()
+        cm.add_customer("Bob", [{'price': 801}])
+
+        # Capture printed output
+        captured = io.StringIO()
+        with contextlib.redirect_stdout(captured):
+            cm.generate_report()
+
+        output = captured.getvalue()
+
+        self.assertIn("Bob", output)
+        self.assertIn("Priority Customer", output)
+
+    def test_potential_future_discount(self):
+        cm = CustomerManager()
+        cm.add_customer("Bob", [{'price': 301}])
+
+        # Capture printed output
+        captured = io.StringIO()
+        with contextlib.redirect_stdout(captured):
+            cm.generate_report()
+
+        output = captured.getvalue()
+
+        self.assertIn("Bob", output)
+        self.assertIn("Potential future discount customer", output)
+
+    def test_lower_than_tax(self):
+        cm = CustomerManager()
+        cm.add_customer("Bob", [{'price': 90}])
+
+        # Capture printed output
+        captured = io.StringIO()
+        with contextlib.redirect_stdout(captured):
+            cm.generate_report()
+
+        output = captured.getvalue()
+
+        self.assertIn("Bob", output)
+        self.assertIn("No discount", output)
 
     def test_heavy_item_shipping_fee(self):
         purchases = [{'price': 100, 'weight': 25}]
